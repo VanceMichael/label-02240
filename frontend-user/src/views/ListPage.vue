@@ -30,6 +30,7 @@
             <span class="price-sep">—</span>
             <el-input v-model.number="priceMax" placeholder="最高价" size="small" style="width: 100px" />
             <button class="price-filter-btn" @click="applyPriceFilter">筛选</button>
+            <button v-if="priceFilterApplied" class="price-clear-btn" @click="clearPriceFilter">清除</button>
           </div>
         </div>
       </div>
@@ -97,14 +98,24 @@ const applyPriceFilter = () => {
   currentPage.value = 1
 }
 
+const clearPriceFilter = () => {
+  priceMin.value = null
+  priceMax.value = null
+  priceFilterApplied.value = false
+  currentPage.value = 1
+}
+
 const filteredItems = computed(() => {
   let list = selectedGame.value
     ? itemStore.getItemsByGame(selectedGame.value)
     : [...itemStore.allItems]
 
   if (priceFilterApplied.value) {
-    if (priceMin.value != null && priceMin.value !== '') list = list.filter(i => i.price >= priceMin.value)
-    if (priceMax.value != null && priceMax.value !== '') list = list.filter(i => i.price <= priceMax.value)
+    const hasMin = priceMin.value != null && priceMin.value !== '' && !isNaN(priceMin.value)
+    const hasMax = priceMax.value != null && priceMax.value !== '' && !isNaN(priceMax.value)
+    
+    if (hasMin) list = list.filter(i => i.price >= priceMin.value)
+    if (hasMax) list = list.filter(i => i.price <= priceMax.value)
   }
 
   switch (sortBy.value) {
@@ -212,6 +223,24 @@ const paginatedItems = computed(() => {
 
   &:hover {
     background: rgba(var(--color-primary-rgb), 0.2);
+  }
+}
+
+.price-clear-btn {
+  padding: 5px 16px;
+  border: 1px solid var(--color-text-muted);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.25s;
+
+  &:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
   }
 }
 
