@@ -86,6 +86,15 @@ watch(currentPage, () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 })
 
+watch([priceMin, priceMax], ([newMin, newMax]) => {
+  const minEmpty = newMin == null || newMin === '' || Number.isNaN(Number(newMin))
+  const maxEmpty = newMax == null || newMax === '' || Number.isNaN(Number(newMax))
+  if (minEmpty && maxEmpty && priceFilterApplied.value) {
+    priceFilterApplied.value = false
+    currentPage.value = 1
+  }
+})
+
 const selectGame = (game) => {
   selectedGame.value = game
   currentPage.value = 1
@@ -93,7 +102,9 @@ const selectGame = (game) => {
 }
 
 const applyPriceFilter = () => {
-  priceFilterApplied.value = true
+  const hasMin = priceMin.value != null && priceMin.value !== '' && !Number.isNaN(priceMin.value)
+  const hasMax = priceMax.value != null && priceMax.value !== '' && !Number.isNaN(priceMax.value)
+  priceFilterApplied.value = hasMin || hasMax
   currentPage.value = 1
 }
 
@@ -103,8 +114,10 @@ const filteredItems = computed(() => {
     : [...itemStore.allItems]
 
   if (priceFilterApplied.value) {
-    if (priceMin.value != null && priceMin.value !== '') list = list.filter(i => i.price >= priceMin.value)
-    if (priceMax.value != null && priceMax.value !== '') list = list.filter(i => i.price <= priceMax.value)
+    const min = Number(priceMin.value)
+    const max = Number(priceMax.value)
+    if (!Number.isNaN(min) && min >= 0) list = list.filter(i => i.price >= min)
+    if (!Number.isNaN(max) && max >= 0) list = list.filter(i => i.price <= max)
   }
 
   switch (sortBy.value) {
