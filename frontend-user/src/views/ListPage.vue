@@ -93,7 +93,9 @@ const selectGame = (game) => {
 }
 
 const applyPriceFilter = () => {
-  priceFilterApplied.value = true
+  const hasMin = priceMin.value != null && priceMin.value !== '' && !isNaN(priceMin.value)
+  const hasMax = priceMax.value != null && priceMax.value !== '' && !isNaN(priceMax.value)
+  priceFilterApplied.value = hasMin || hasMax
   currentPage.value = 1
 }
 
@@ -103,8 +105,12 @@ const filteredItems = computed(() => {
     : [...itemStore.allItems]
 
   if (priceFilterApplied.value) {
-    if (priceMin.value != null && priceMin.value !== '') list = list.filter(i => i.price >= priceMin.value)
-    if (priceMax.value != null && priceMax.value !== '') list = list.filter(i => i.price <= priceMax.value)
+    if (priceMin.value != null && priceMin.value !== '' && !isNaN(priceMin.value)) {
+      list = list.filter(i => i.price >= priceMin.value)
+    }
+    if (priceMax.value != null && priceMax.value !== '' && !isNaN(priceMax.value)) {
+      list = list.filter(i => i.price <= priceMax.value)
+    }
   }
 
   switch (sortBy.value) {
